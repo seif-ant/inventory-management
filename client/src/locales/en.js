@@ -6,8 +6,32 @@ export default {
     orders: 'Orders',
     finance: 'Finance',
     demandForecast: 'Demand Forecast',
+    restocking: 'Restocking',
     companyName: 'Catalyst Components',
     subtitle: 'Inventory Management System'
+  },
+
+  // Restocking
+  restocking: {
+    title: 'Restocking',
+    description: 'Set a budget and submit a restocking order based on demand forecasts',
+    budget: 'Budget',
+    recommendations: 'Recommended Items',
+    placeOrder: 'Place Order',
+    placing: 'Placing order...',
+    totalCost: 'Total Cost',
+    remainingBudget: 'Remaining Budget',
+    recommendedQty: 'Recommended Qty',
+    lineCost: 'Line Cost',
+    orderPlaced: 'Order placed successfully',
+    noRecommendations: 'No items fit within this budget. Increase the budget to see recommendations.',
+    table: {
+      sku: 'SKU',
+      itemName: 'Item Name',
+      trend: 'Trend',
+      currentDemand: 'Current Demand',
+      forecastedDemand: 'Forecasted Demand'
+    }
   },
 
   // Dashboard
@@ -104,6 +128,8 @@ export default {
   // Orders
   orders: {
     title: 'Orders',
+    submittedOrders: 'Submitted Orders',
+    leadTimeDays: '{days} days',
     description: 'View and manage customer orders',
     allOrders: 'All Orders',
     totalOrders: 'Total Orders',
@@ -125,6 +151,7 @@ export default {
       totalValue: 'Total Value',
       status: 'Status',
       expectedDelivery: 'Expected Delivery',
+      leadTime: 'Lead Time',
       actualDelivery: 'Actual Delivery'
     }
   },
@@ -200,6 +227,7 @@ export default {
 
   // Statuses
   status: {
+    submitted: 'Submitted',
     delivered: 'Delivered',
     shipped: 'Shipped',
     processing: 'Processing',
@@ -323,6 +351,7 @@ export default {
     search: 'Search',
     filter: 'Filter',
     export: 'Export',
-    items: 'items'
+    items: 'items',
+    unitCost: 'Unit Cost'
   }
 }

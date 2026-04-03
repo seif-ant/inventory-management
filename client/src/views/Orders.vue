@@ -27,6 +27,54 @@
         </div>
       </div>
 
+      <div v-if="submittedOrders.length > 0" class="card submitted-orders-card">
+        <div class="card-header">
+          <h3 class="card-title">{{ t('orders.submittedOrders') }} ({{ submittedOrders.length }})</h3>
+        </div>
+        <div class="table-container">
+          <table class="orders-table submitted-table">
+            <thead>
+              <tr>
+                <th class="col-order-number">{{ t('orders.table.orderNumber') }}</th>
+                <th class="col-items">{{ t('orders.table.items') }}</th>
+                <th class="col-status">{{ t('orders.table.status') }}</th>
+                <th class="col-date">{{ t('orders.table.orderDate') }}</th>
+                <th class="col-date">{{ t('orders.table.expectedDelivery') }}</th>
+                <th class="col-lead">{{ t('orders.table.leadTime') }}</th>
+                <th class="col-value">{{ t('orders.table.totalValue') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="order in submittedOrders" :key="order.id || order.order_number">
+                <td class="col-order-number"><strong>{{ order.order_number }}</strong></td>
+                <td class="col-items">
+                  <details class="items-details">
+                    <summary class="items-summary">
+                      {{ t('orders.itemsCount', { count: order.items.length }) }}
+                    </summary>
+                    <div class="items-dropdown">
+                      <div v-for="(item, idx) in order.items" :key="idx" class="item-entry">
+                        <span class="item-name">{{ translateProductName(item.name) }}</span>
+                        <span class="item-meta">{{ t('orders.quantity') }}: {{ item.quantity }} @ {{ currencySymbol }}{{ item.unit_price }}</span>
+                      </div>
+                    </div>
+                  </details>
+                </td>
+                <td class="col-status">
+                  <span :class="['badge', getOrderStatusClass(order.status)]">
+                    {{ t(`status.${order.status.toLowerCase()}`) }}
+                  </span>
+                </td>
+                <td class="col-date">{{ formatDate(order.order_date) }}</td>
+                <td class="col-date">{{ formatDate(order.expected_delivery) }}</td>
+                <td class="col-lead">{{ getLeadTime(order) }}</td>
+                <td class="col-value"><strong>{{ currencySymbol }}{{ order.total_value.toLocaleString() }}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-header">
           <h3 class="card-title">{{ t('orders.allOrders') }} ({{ orders.length }})</h3>
@@ -95,8 +143,8 @@ export default {
     const loading = ref(true)
     const error = ref(null)
     const orders = ref([])
+    const submittedOrders = ref([])
 
-    // Use shared filters
     const {
       selectedPeriod,
       selectedLocation,
@@ -111,7 +159,6 @@ export default {
         const filters = getCurrentFilters()
         const fetchedOrders = await api.getOrders(filters)
 
-        // Sort orders by order_date (earliest first)
         orders.value = fetchedOrders.sort((a, b) => {
           const dateA = new Date(a.order_date)
           const dateB = new Date(b.order_date)
@@ -124,7 +171,15 @@ export default {
       }
     }
 
-    // Watch for filter changes and reload data
+    const loadSubmittedOrders = async () => {
+      try {
+        const data = await api.getSubmittedOrders()
+        submittedOrders.value = Array.isArray(data) ? data : []
+      } catch (err) {
+        console.error('Failed to load submitted orders:', err)
+      }
+    }
+
     watch([selectedPeriod, selectedLocation, selectedCategory, selectedStatus], () => {
       loadOrders()
     })
@@ -135,34 +190,51 @@ export default {
 
     const getOrderStatusClass = (status) => {
       const statusMap = {
-        'Delivered': 'success',
-        'Shipped': 'info',
-        'Processing': 'warning',
-        'Backordered': 'danger'
+        'Delivered': 'badge-success',
+        'Shipped': 'badge-info',
+        'Processing': 'badge-warning',
+        'Backordered': 'badge-danger',
+        'Submitted': 'badge-info'
       }
-      return statusMap[status] || 'info'
+      return statusMap[status] || 'badge-info'
     }
 
     const formatDate = (dateString) => {
+      if (!dateString) return '-'
+      const d = new Date(dateString)
+      if (isNaN(d.getTime())) return '-'
       const { currentLocale } = useI18n()
       const locale = currentLocale.value === 'ja' ? 'ja-JP' : 'en-US'
-      return new Date(dateString).toLocaleDateString(locale, {
+      return d.toLocaleDateString(locale, {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
       })
     }
 
-    onMounted(loadOrders)
+    const getLeadTime = (order) => {
+      const start = new Date(order.order_date)
+      const end = new Date(order.expected_delivery)
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) return '-'
+      const days = Math.round((end - start) / 86400000)
+      return t('orders.leadTimeDays', { days })
+    }
+
+    onMounted(() => {
+      loadOrders()
+      loadSubmittedOrders()
+    })
 
     return {
       t,
       loading,
       error,
       orders,
+      submittedOrders,
       getOrdersByStatus,
       getOrderStatusClass,
       formatDate,
+      getLeadTime,
       currencySymbol,
       translateProductName,
       translateCustomerName
@@ -172,13 +244,11 @@ export default {
 </script>
 
 <style scoped>
-/* Fixed table layout to prevent column shifting */
 .orders-table {
   table-layout: fixed;
   width: 100%;
 }
 
-/* Column widths */
 .col-order-number {
   width: 130px;
 }
@@ -199,11 +269,23 @@ export default {
   width: 140px;
 }
 
+.col-lead {
+  width: 120px;
+}
+
 .col-value {
   width: 120px;
 }
 
-/* Items details styling */
+.submitted-orders-card {
+  margin-bottom: 1.5rem;
+  border-left: 3px solid #3b82f6;
+}
+
+.submitted-table {
+  table-layout: fixed;
+}
+
 .items-details {
   position: relative;
 }
@@ -238,7 +320,6 @@ export default {
   text-decoration: underline;
 }
 
-/* Dropdown container */
 .items-dropdown {
   position: absolute;
   top: 100%;

@@ -6,8 +6,32 @@ export default {
     orders: '注文',
     finance: '財務',
     demandForecast: '需要予測',
+    restocking: '補充',
     companyName: '触媒コンポーネンツ',
     subtitle: '在庫管理システム'
+  },
+
+  // Restocking
+  restocking: {
+    title: '補充',
+    description: '需要予測に基づき予算を設定し補充注文を送信',
+    budget: '予算',
+    recommendations: '推奨アイテム',
+    placeOrder: '注文する',
+    placing: '送信中...',
+    totalCost: '合計',
+    remainingBudget: '残予算',
+    recommendedQty: '推奨数量',
+    lineCost: '小計',
+    orderPlaced: '注文を送信しました',
+    noRecommendations: 'この予算で推奨できる品目はありません。予算を増やしてください。',
+    table: {
+      sku: 'SKU',
+      itemName: '品目名',
+      trend: 'トレンド',
+      currentDemand: '現在の需要',
+      forecastedDemand: '予測需要'
+    }
   },
 
   // Dashboard
@@ -104,6 +128,8 @@ export default {
   // Orders
   orders: {
     title: '注文',
+    submittedOrders: '送信済み注文',
+    leadTimeDays: '{days}日',
     description: '顧客注文の表示と管理',
     allOrders: 'すべての注文',
     totalOrders: '総注文数',
@@ -125,6 +151,7 @@ export default {
       totalValue: '合計金額',
       status: 'ステータス',
       expectedDelivery: '予定配達日',
+      leadTime: 'リードタイム',
       actualDelivery: '実際の配達日'
     }
   },
@@ -200,6 +227,7 @@ export default {
 
   // Statuses
   status: {
+    submitted: '送信済み',
     delivered: '配達済み',
     shipped: '出荷済み',
     processing: '処理中',
@@ -323,7 +351,8 @@ export default {
     search: '検索',
     filter: 'フィルター',
     export: 'エクスポート',
-    items: '件'
+    items: '件',
+    unitCost: '単価'
   },
 
   // Product Names
